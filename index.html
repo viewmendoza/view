@@ -3,33 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Access</title>
     <!-- Include TensorFlow.js library -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.10.1/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@3.10.1/dist/coco-ssd.min.js"></script>
     <!-- Include SVG.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.14/svg.min.js"></script>
-
-    <title>Camera Access</title>
 </head>
 <body>
+    <!-- Video feed from camera -->
     <video id="video" width="640" height="480" autoplay></video>
+
     <!-- Display area for SVG graphics -->
-<div id="svg-container"></div>
+    <div id="svg-container"></div>
+
     <!-- Button to start object detection -->
     <button onclick="startObjectDetection()">Start Object Detection</button>
+
     <script>
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(function (stream) {
-                var video = document.getElementById('video');
-                video.srcObject = stream;
-                video.onloadedmetadata = function (e) {
-                    video.play();
-                };
-            })
-            .catch(function (err) {
-                console.log("An error occurred: " + err);
-            });
-            // Function to start the object detection process
+        // Function to start the object detection process
         async function startObjectDetection() {
             // Load the COCO-SSD model
             const model = await cocoSsd.load();
@@ -44,6 +36,7 @@
             setInterval(async () => {
                 const predictions = await model.detect(video);
                 renderSVG(predictions, draw);
+                displaySVG(draw); // Display SVG graphics after rendering
             }, 1000); // Adjust interval as needed
         }
         
@@ -59,12 +52,24 @@
             });
         }
 
-          // Function to display SVG graphics
+        // Function to display SVG graphics
         function displaySVG(draw) {
             const svgContainer = document.getElementById('svg-container');
             svgContainer.innerHTML = draw.svg();
         }
-        
-     </script>
+
+        // Access the camera and start the video stream
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                var video = document.getElementById('video');
+                video.srcObject = stream;
+                video.onloadedmetadata = function (e) {
+                    video.play();
+                };
+            })
+            .catch(function (err) {
+                console.log("An error occurred: " + err);
+            });
+    </script>
 </body>
 </html>
