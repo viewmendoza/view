@@ -15,6 +15,8 @@
     <video id="video" width="640" height="480" autoplay></video>
     <!-- Display area for SVG graphics -->
 <div id="svg-container"></div>
+    <!-- Button to start object detection -->
+    <button onclick="startObjectDetection()">Start Object Detection</button>
     <script>
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(function (stream) {
@@ -27,9 +29,7 @@
             .catch(function (err) {
                 console.log("An error occurred: " + err);
             });
-    </script>
-    <script>
-        // Function to start the object detection process
+            // Function to start the object detection process
         async function startObjectDetection() {
             // Load the COCO-SSD model
             const model = await cocoSsd.load();
@@ -65,8 +65,6 @@
             svgContainer.innerHTML = draw.svg();
         }
         
-        // Call the function to start object detection when the page loads
-        window.onload = startObjectDetection;
-    </script>
+     </script>
 </body>
 </html>
