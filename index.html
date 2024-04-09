@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include TensorFlow.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.10.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@3.10.1/dist/coco-ssd.min.js"></script>
+    <!-- Include SVG.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.14/svg.min.js"></script>
+
     <title>Camera Access</title>
 </head>
 <body>
     <video id="video" width="640" height="480" autoplay></video>
+    <!-- Display area for SVG graphics -->
+<div id="svg-container"></div>
     <script>
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(function (stream) {
@@ -19,6 +27,46 @@
             .catch(function (err) {
                 console.log("An error occurred: " + err);
             });
+    </script>
+    <script>
+        // Function to start the object detection process
+        async function startObjectDetection() {
+            // Load the COCO-SSD model
+            const model = await cocoSsd.load();
+            
+            // Access the video element
+            const video = document.getElementById('video');
+            
+            // Create an SVG canvas
+            const draw = SVG().addTo('#svg-container').size('100%', '100%');
+            
+            // Continuously detect objects in the video stream
+            setInterval(async () => {
+                const predictions = await model.detect(video);
+                renderSVG(predictions, draw);
+            }, 1000); // Adjust interval as needed
+        }
+        
+        // Function to render SVG graphics based on object predictions
+        function renderSVG(predictions, draw) {
+            // Clear previous SVG content
+            draw.clear();
+            
+            // Create SVG shapes based on object predictions
+            predictions.forEach(prediction => {
+                const { bbox } = prediction;
+                draw.rect(bbox[2], bbox[3]).move(bbox[0], bbox[1]).fill('none').stroke({ color: 'black', width: 2 });
+            });
+        }
+
+          // Function to display SVG graphics
+        function displaySVG(draw) {
+            const svgContainer = document.getElementById('svg-container');
+            svgContainer.innerHTML = draw.svg();
+        }
+        
+        // Call the function to start object detection when the page loads
+        window.onload = startObjectDetection;
     </script>
 </body>
 </html>
